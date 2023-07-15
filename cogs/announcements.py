@@ -53,7 +53,7 @@ def get_role(guild_id):
         case 728589320713404437:
             return "1118096782241579110"
         case _:
-            return "1090721180668932096"
+            return "1085631729651421345"
 
 
 class Announcements(commands.Cog):
@@ -74,18 +74,18 @@ class Announcements(commands.Cog):
         from_guild = message.reference.guild_id
         to_guild = discord.utils.get(self.bot.guilds, name=os.getenv('DISCORD_GUILD'))
         to_channel = to_guild.get_channel(announceChannel)
-        can_ping = time.time() - announceTimes.get(from_guild) < ANNOUNCEMENT_COOLDOWN_IN_MS
+        can_ping = time.time() - announceTimes.get(
+            from_guild) < ANNOUNCEMENT_COOLDOWN_IN_MS if from_guild in announceTimes else True
 
         if is_edit:
             template = "**Edited from an earlier message in %s**\n<@&%s>\n\n%s"
         else:
-            template = "**From %s**\n" + (
-                "<@&%s>" % (get_role(from_guild)) if can_ping else "@" + to_guild.name) + "\n\n%s "
+            template = "**From %s**\n" + "<@&%s>" % get_role(from_guild) + "\n\n%s "
 
         if can_ping:
             announceTimes[from_guild] = time.time()
 
-        allowed = discord.AllowedMentions.all()
+        allowed = discord.AllowedMentions.all() if can_ping else discord.AllowedMentions.none()
         allowed.everyone = False
         await to_channel.send(
             content=template % (message.author.display_name, message.content),
